@@ -1,4 +1,4 @@
-# Nix Extra
+# `nix-extra`
 
 My personal nix helpers
 
@@ -25,7 +25,7 @@ in
   ]
 ```
 
-```
+```sh
 $ nix-build
 $ result/bin/switch-to-profile
 ```
