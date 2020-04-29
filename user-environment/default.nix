@@ -8,6 +8,6 @@ let
     
     paths = packages;
   };
-in writeShellScriptBin "switch-to-profile" ''
+in writeShellScriptBin "switch-to-environment" ''
 nix-env --set ${profile}
 ''
