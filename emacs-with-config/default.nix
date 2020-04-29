@@ -7,10 +7,18 @@
 # config files to load path, etc.), run `(file-name-directory
 # load-file-name)`
 
-packagesFun: config:
+{ # Function that takes emacsPackages and returns a list
+  packages
+
+, # Emacs config
+  config
+
+, # POSIX-compatible files to source before Emacs.app starts
+  sourceFiles ? []
+}:
 
 let
-  emacs = emacsWithPackages packagesFun;
+  emacs = emacsWithPackages packages;
   configFile =
     if builtins.isPath config || lib.attrsets.isDerivation config
       then if builtins.pathIsDirectory "${config}"
@@ -31,7 +39,7 @@ for prog in ${emacs}/bin/{emacs,emacs-*}; do
   local progname=$(basename "$prog")
   rm -f "$out/bin/$progname"
   makeWrapper "$prog" "$out/bin/$progname" \
-    --add-flags "-Q --load ${configFile}"
+    --add-flags "-q --load ${configFile}"
 done
 
 # Wrap the MacOS Application, if it exists
@@ -43,7 +51,9 @@ if [ -d "${emacs}/Applications/Emacs.app" ]; then
         $out/Applications/Emacs.app/Contents
   makeWrapper "${emacs}/Applications/Emacs.app/Contents/MacOS/Emacs" \
               "$out/Applications/Emacs.app/Contents/MacOS/Emacs" \
-    --add-flags "-Q --load ${configFile}"
+    --add-flags "-q --load ${configFile}" \
+    ${builtins.concatStringsSep " "
+       (map (str: ''--run "source '' + str + ''"'') sourceFiles)}
 fi
 
 mkdir -p $out/share

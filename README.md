@@ -52,9 +52,12 @@ with pkgs; with callPackage (fetchgit {
   sha256 = ...;
 }) {};
 
-emacsWithConfig (ep: with ep; [ magit ]) ''
-  (require 'magit)
-''
+emacsWithConfig {
+  packages = ep: with ep; [ magit ];
+  config = ''
+    (require 'magit)
+  '';
+}
 ```
 
 Instead of a string, `emacsWithConfig` can also take a filepath or a
@@ -78,3 +81,8 @@ Notes/Tips:
 
   - When passing a path to a nix derivation, the path is copied into
     the nix store before being used, so your config will be read-only.
+
+  - On MacOS, Emacs.app never inherits information from your shell
+    env. The `sourceFiles` argument is an optional argument to
+    `emacsWithPackages` that allows you to list (bash-compatible)
+    files to source so Emacs is able to inherit your shell enviroment.
