@@ -19,8 +19,8 @@ Usage:
 
 with pkgs; with callPackage (fetchgit {
   url    = "https://github.com/transitracer/nix-extra";
-  rev    = "6da523698a2d552a917a208decaf88351394a6bb";
-  sha256 = "18mb5cj0gc5dcxpnz46afvvmgp7q8gwsx2jadrkpdq0z5qsvsb1j";
+  rev    = ...;
+  sha256 = ...;
 }) {};
 
 userEnv [
@@ -48,8 +48,8 @@ Usage:
 
 with pkgs; with callPackage (fetchgit {
   url    = "https://github.com/transitracer/nix-extra";
-  rev    = "6da523698a2d552a917a208decaf88351394a6bb";
-  sha256 = "18mb5cj0gc5dcxpnz46afvvmgp7q8gwsx2jadrkpdq0z5qsvsb1j";
+  rev    = ...;
+  sha256 = ...;
 }) {};
 
 emacsWithConfig (ep: with ep; [ magit ]) ''
