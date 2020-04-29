@@ -17,13 +17,16 @@ Usage:
 ```nix
 { pkgs ? import <nixpkgs> {} }:
 
-let
-  userEnvironment = callPackage ./path-to-repository/user-environment {};
-in
-  userEnvironment [
-    # Add packages here
-    hello
-  ]
+with pkgs; with callPackage (fetchgit {
+  url    = "https://github.com/transitracer/nix-extra";
+  rev    = "6da523698a2d552a917a208decaf88351394a6bb";
+  sha256 = "18mb5cj0gc5dcxpnz46afvvmgp7q8gwsx2jadrkpdq0z5qsvsb1j";
+}) {};
+
+userEnv [
+  # Add packages here
+  hello
+]
 ```
 
 ```sh
@@ -43,12 +46,15 @@ Usage:
 ```nix
 { pkgs ? import <nixpkgs> {} }:
 
-let
-  emacsWithConfig = callPackages ./path-to-repository/emacs-with-config {};
-in
-  emacsWithConfig (ep: with ep; [ magit ]) ''
+with pkgs; with callPackage (fetchgit {
+  url    = "https://github.com/transitracer/nix-extra";
+  rev    = "6da523698a2d552a917a208decaf88351394a6bb";
+  sha256 = "18mb5cj0gc5dcxpnz46afvvmgp7q8gwsx2jadrkpdq0z5qsvsb1j";
+}) {};
+
+emacsWithConfig (ep: with ep; [ magit ]) ''
   (require 'magit)
-  ''
+''
 ```
 
 Instead of a string, `emacsWithConfig` can also take a filepath or a
