@@ -1,4 +1,4 @@
-{ emacsWithPackages, makeWrapper, writeText, runCommand, lib }:
+{ emacsWithPackages, copyPathToStore, makeWrapper, writeText, runCommand, lib }:
 
 # emacsWithConfig has leaves you with a double-wrapped emacs, but
 # there's not much to be done about that.
@@ -20,11 +20,10 @@
 let
   emacs = emacsWithPackages packages;
   configFile =
-    if builtins.isPath config || lib.attrsets.isDerivation config
-      then if builtins.pathIsDirectory "${config}"
-      	   # FIXME: Check if this file exists
-           then "${config}/init.el"
-	   else config
+    if builtins.isPath config
+      then if lib.pathIsDirectory config
+           then "${copyPathToStore config}/init.el"
+           else config
     else if builtins.isString config
       then writeText "init.el" config
     else builtins.throw ("config cannot be of type " + builtins.typeOf config);
