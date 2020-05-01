@@ -1,6 +1,12 @@
 { pkgs ? import <nixpkgs> {} }:
 
-{
-  userEnv         = pkgs.callPackage ./user-environment  {};
-  emacsWithConfig = pkgs.callPackage ./emacs-with-config {};
-}
+let
+  myPkgs = import ./pkgs {
+    inherit pkgs;
+  };
+in {
+  lib = import ./lib { inherit pkgs; };
+  modules = import ./modules;
+  overlays = import ./overlays;
+  pkgs = myPkgs;
+} // myPkgs
