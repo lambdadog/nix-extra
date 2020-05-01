@@ -1,6 +1,6 @@
 # `nix-extra`
 
-My personal nix helpers
+My personal nix helpers. Also a NUR repository.
 
 ## `user-environment`
 
@@ -17,11 +17,11 @@ Usage:
 ```nix
 { pkgs ? import <nixpkgs> {} }:
 
-with pkgs; with callPackage (fetchgit {
+with pkgs; with (callPackage (fetchgit {
   url    = "https://github.com/transitracer/nix-extra";
   rev    = ...;
   sha256 = ...;
-}) {};
+}) {}).pkgs;
 
 userEnv [
   # Add packages here
@@ -46,11 +46,11 @@ Usage:
 ```nix
 { pkgs ? import <nixpkgs> {} }:
 
-with pkgs; with callPackage (fetchgit {
+with pkgs; with (callPackage (fetchgit {
   url    = "https://github.com/transitracer/nix-extra";
   rev    = ...;
   sha256 = ...;
-}) {};
+}) {}).pkgs;
 
 emacsWithConfig {
   packages = ep: with ep; [ magit ];
