@@ -1,64 +1,59 @@
-{ buildEnv, writeShellScriptBin }:
+{ buildEnv, writeShellScriptBin, writeTextDir }:
 
-packages:
+{ name ? "user-environment"
+
+, # A list of packages to install
+  packages
+
+, # If true, don't allow the user-environment to be modified imperatively
+  static ? false
+}:
 
 let
+  serialize = value:
+    let
+      type = builtins.typeOf value;
+    in
+      if type == "string" || type == "bool" || type == "int"
+        then builtins.toJSON value
+      else if type == "list"
+        then builtins.concatStringsSep "" [
+          "["
+          (builtins.concatStringsSep " " (builtins.map serialize value))
+          "]"
+        ]
+      else if type == "set"
+        then builtins.concatStringsSep " " [
+          "{"
+          (builtins.concatStringsSep " "
+            (builtins.map
+              (name: builtins.concatStringsSep "" [
+                (builtins.toJSON name) # Be safe and quote it
+                " = "
+                (serialize value.${name})
+                ";"
+              ]) (builtins.attrNames value)))
+          "}"
+        ]
+      else throw "Couldn't serialize value of type '${type}'";
+  
+  manifest = writeTextDir "manifest.nix"
+    (if !static
+     then serialize (map (pkg: with pkg; {
+       inherit meta name outPath outputs system type;
+	     out = {
+	       inherit outPath;
+	     };
+     }) packages)
+     else ''
+     abort "user-environment is static and cannot be modified imperatively"
+     '');  
+
   profile = buildEnv {
-    name = "user-environment";
+    inherit name;
     
-    paths = packages;
+    paths = packages ++ [ manifest ];
   };
-
-  command = {
-    shell = ''
-    nix-shell -p ${profile}
-    '';
-
-    test = ''
-    nix-env --set ${profile}
-    '';
-
-    switch = ''
-    echo "Switching to read-only profile"
-    nix-env --switch-profile ${profile}
-    '';
-
-    reset = ''
-    if [ -d "/nix/var/nix/profiles/per-user/$USER/profile/" ]; then
-      echo "Resetting profile to /nix/var/nix/profiles/per-user/$USER/profile/"
-      nix-env --switch-profile "/nix/var/nix/profiles/per-user/$USER/profile/"
-    else
-      echo "Couldn't find a per-user profile for $USER"
-      echo "Resetting profile to /nix/var/nix/profiles/default/"
-      nix-env --switch-profile "/nix/var/nix/profiles/default/"
-    fi
-    '';
-
-    help = ''
-    echo "$0 [shell|test|switch|reset]"
-    '';
-  };
-
-in writeShellScriptBin "switch-to-environment" ''
-case $1 in
-  "shell")
-  ${command.shell}
-  ;;
-
-  "test")
-  ${command.test}
-  ;;
-
-  "switch")
-  ${command.switch}
-  ;;
-
-  "reset")
-  ${command.reset}
-  ;;
-
-  *)
-  ${command.help}
-  ;;
-esac
-''
+in writeShellScriptBin "install-user-environment" ''
+  nix-env --set ${profile}
+'';

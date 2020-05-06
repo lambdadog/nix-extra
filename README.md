@@ -23,16 +23,22 @@ with pkgs; with (callPackage (fetchgit {
   sha256 = ...;
 }) {}).pkgs;
 
-userEnv [
-  # Add packages here
-  hello
-]
+userEnv {
+  packages = [
+    hello
+  ];
+}
 ```
 
 ```sh
 $ nix-build
-$ result/bin/switch-to-environment
+$ result/bin/install-user-environment
 ```
+
+Notes/Tips:
+
+  - If you want your user-environment to not be editable imperatively,
+    you can pass `static = true;` to `userEnv`.
 
 ## `emacs-with-config`
 
