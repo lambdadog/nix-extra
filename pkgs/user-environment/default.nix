@@ -41,9 +41,9 @@ let
     (if !static
      then serialize (map (pkg: with pkg; {
        inherit meta name outPath outputs system type;
-	     out = {
-	       inherit outPath;
-	     };
+       out = {
+         inherit outPath;
+       };
      }) packages)
      else ''
      abort "user-environment is static and cannot be modified imperatively"
