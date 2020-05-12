@@ -1,4 +1,4 @@
-{ buildEnv, writeShellScriptBin, writeTextDir }:
+{ buildEnv, writeShellScriptBin, writeTextDir, linkFarm, manifestBuilder }:
 
 { name ? "user-environment"
 
@@ -10,44 +10,15 @@
 }:
 
 let
-  serialize = value:
-    let
-      type = builtins.typeOf value;
-    in
-      if type == "string" || type == "bool" || type == "int"
-        then builtins.toJSON value
-      else if type == "list"
-        then builtins.concatStringsSep "" [
-          "["
-          (builtins.concatStringsSep " " (builtins.map serialize value))
-          "]"
-        ]
-      else if type == "set"
-        then builtins.concatStringsSep " " [
-          "{"
-          (builtins.concatStringsSep " "
-            (builtins.map
-              (name: builtins.concatStringsSep "" [
-                (builtins.toJSON name) # Be safe and quote it
-                " = "
-                (serialize value.${name})
-                ";"
-              ]) (builtins.attrNames value)))
-          "}"
-        ]
-      else throw "Couldn't serialize value of type '${type}'";
-  
-  manifest = writeTextDir "manifest.nix"
-    (if !static
-     then serialize (map (pkg: with pkg; {
-       inherit meta name outPath outputs system type;
-       out = {
-         inherit outPath;
-       };
-     }) packages)
-     else ''
-     abort "user-environment is static and cannot be modified imperatively"
-     '');  
+  manifest =
+    if static
+    then writeTextDir "manifest.nix" ''
+      abort "user-environment is static and cannot be modified imperatively"
+    ''
+    else linkFarm "manifest.nix" [{
+      name = "manifest.nix";
+      path = manifestBuilder packages;
+    }];
 
   profile = buildEnv {
     inherit name;
@@ -56,4 +27,4 @@ let
   };
 in writeShellScriptBin "install-user-environment" ''
   nix-env --set ${profile}
-'';
+''
