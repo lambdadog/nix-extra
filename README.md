@@ -2,6 +2,9 @@
 
 My personal nix helpers. Also a NUR repository.
 
+See my [nix-config](https://github.com/lambdadog/nix-config)
+repository for my personal usage.
+
 ## Usage
 
 Can be accessed at `nur.repos.lambdadog` in the
