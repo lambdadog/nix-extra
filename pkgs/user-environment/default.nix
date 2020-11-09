@@ -11,6 +11,9 @@
 
 let
   # https://github.com/NixOS/nix/blob/387f824cab50682e373ade49dcec4e6f99c10a42/src/nix-env/user-env.cc#L47
+  # We're forced to take a detour through `_outPath` due to
+  # `builtins.toJSON`'s behavior when used with any set that contains
+  # an `outPath` attribute (it just prints the value of `outPath`)
   manifest-json = writeText "user-environment.json" (builtins.toJSON (map
     (pkg:
       let
